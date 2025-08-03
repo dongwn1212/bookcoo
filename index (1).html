@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지호의 서재</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            margin: 2rem;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #edf2f7;
+        }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        .search-box {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 50%;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>📚 지호의 서재</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" onkeyup="searchBooks()" placeholder="도서명 또는 저자 검색...">
+    </div>
+    <table id="bookTable">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>도서명</th>
+                <th>저자</th>
+                <th>출판사</th>
+                <th>출간일</th>
+            </tr>
+        </thead>
+        <tbody id="bookTableBody">
+        </tbody>
+    </table>
+
+    <script>
+        async function loadBooks() {
+            const response = await fetch('books.csv');
+            const text = await response.text();
+            const rows = text.split('\n').slice(1);
+            const tableBody = document.getElementById('bookTableBody');
+            rows.forEach((row, index) => {
+                if (!row.trim()) return;
+                const cols = row.split(',');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${cols[0]}</td>
+                    <td>${cols[1]}</td>
+                    <td>${cols[2]}</td>
+                    <td>${cols[3]}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function searchBooks() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('bookTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const tds = tr[i].getElementsByTagName('td');
+                let found = false;
+                for (let j = 1; j < tds.length - 1; j++) {
+                    if (tds[j].textContent.toLowerCase().includes(filter)) {
+                        found = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+
+        window.onload = loadBooks;
+    </script>
+</body>
+</html>
